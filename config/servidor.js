@@ -5,8 +5,11 @@ const app = express()
 //definir a porta do servidor local
 const porta = 3535
 
-//definir a pasta dos arquivos esteticos (css,imagens,jquery)
+//definir a pastas dos arquivos estaticos (css, imagens, jquery)
 app.use(express.static('./assets'))
 
-//exportar o app e a porta
+//definir o express como body parse
+app.use(express.urlencoded({extended:false}))
+
+//exporta o app e a porta
 module.exports={app,porta}

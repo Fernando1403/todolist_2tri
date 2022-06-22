@@ -1,8 +1,6 @@
-module.exports = (app)=>{
-
-    //rota aleatória
-    app.get('/',(req,res)=>{
-    //res.send('qualquer coisa')
-    res.render('index.ejs')
+module.exports = (app) => {
+    //abrir a view index.ejs
+    app.get('/', (req, res) => {
+        res.render('index.ejs')
     })
 }

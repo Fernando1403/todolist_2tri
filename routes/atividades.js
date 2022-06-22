@@ -1,96 +1,113 @@
 const atividades = require('../models/atividades')
 const usuarios = require('../models/usuarios')
 
-module.exports = (app)=>{
-    app.get('/atividades',async(req,res)=>{
+module.exports = (app) => {
+    //criar a rota para renderizar a view atividades
+    app.get('/atividades', async (req, res) => {
         //capturar o id da barra de endereço
         var id = req.query.id
-        //buscar o nome na collection usuarios
-        var user = await usuarios.findOne({_id:id})  
+        //buscar o nome da collection usuarios
+        var user = await usuarios.findOne({ _id: id })
         //buscar todas as atividades desse usuário
-        var abertas = await atividades.find({usuario:id,status:0}).sort({data:1})
+        var abertas = await atividades.find({ usuario: id, status: 0 }).sort({ data: 1 })
         //buscar todas as atividades desse usuário
-        var entregues = await atividades.find({usuario:id,status:1}).sort({data:1})
+        var entregues = await atividades.find({ usuario: id, status: 1 }).sort({ data: 1 })
         //buscar todas as atividades desse usuário
-        var excluidas = await atividades.find({usuario:id,status:2}).sort({data:1})
-        //console.log(buscar)
-        //res.render('atividades.ejs',{nome:user.nome,id:user._id,dados:abertas,dadosx:excluidas,dadose:entregues})
-        //res.render('accordion.ejs',{nome:user.nome,id:user._id,dados:abertas,dadosx:excluidas,dadose:entregues})
-        res.render('atividades2.ejs',{nome:user.nome,id:user._id,dados:abertas,dadosx:excluidas,dadose:entregues})
+        var excluidas = await atividades.find({ usuario: id, status: 2 }).sort({ data: 1 })
+
+        res.render('atividades2.ejs', { nome: user.nome, id: user._id, dados: abertas, dadose: entregues, dadosx: excluidas })
 
     })
-    app.post('/atividades',async(req,res)=>{
+
+    //gravar as informações do formulário na collection atividades
+    app.post('/atividades', async (req, res) => {
         //recuperando as informações digitadas
         var dados = req.body
+        //exibindo no terminal
         //console.log(dados)
         //conectar com o database
         const conexao = require('../config/database')()
-        //model atividades
+        //importar a model atividades
         const atividades = require('../models/atividades')
         //salvar as informações do formulário no database
         var salvar = await new atividades({
-            data:dados.data,
-            tipo:dados.tipo,
-            entrega:dados.entrega,
-            disciplina:dados.disciplina,
-            instrucoes:dados.orientacao,
-            usuario:dados.id
+            data: dados.data,
+            disciplina: dados.disciplina,
+            tipo: dados.tipo,
+            entrega: dados.entrega,
+            instrucoes: dados.orientacao,
+            usuario: dados.id
         }).save()
-        res.redirect('/atividades?id='+dados.id)
+        //redirecionar para a rota atividades
+        res.redirect('/atividades?id=' + dados.id)
     })
 
-     app.get("/excluir",async(req,res)=>{
-    //recuperar o parametro id da barra de endereço
+    //excluir atividades
+    app.get('/excluir', async (req, res) => {
+        //recuperar o parâmetro id da barra de endereço
         var id = req.query.id
         var excluir = await atividades.findOneAndUpdate(
-            {_id:id},
-            {status:2}
+            { _id: id },
+            { status: 2 }
         )
         //redirecionar para a rota atividades
-        res.redirect('/atividades?id='+excluir.usuario)
+        res.redirect('/atividades?id=' + excluir.usuario)
     })
 
-app.get("/entregue",async(req,res)=>{
-    //recuperar o parametro id da barra de endereço
+    //entregar atividades
+    app.get('/entregue', async (req, res) => {
+        //recuperar o parâmetro id da barra de endereço
         var id = req.query.id
         var entregue = await atividades.findOneAndUpdate(
-            {_id:id},
-            {status:1}
+            { _id: id },
+            { status: 1 }
         )
         //redirecionar para a rota atividades
-        res.redirect('/atividades?id='+entregue.usuario)
+        res.redirect('/atividades?id=' + entregue.usuario)
     })
 
-    app.get("/desfazer",async(req,res)=>{
-        //recuperar o parametro id da barra de endereço
-            var id = req.query.id
-            var desfazer = await atividades.findOneAndUpdate(
-                {_id:id},
-                {status:0}
-            )
-            //redirecionar para a rota atividades
-            res.redirect('/atividades?id='+desfazer.usuario)
-        })
+    //desfazer ações
+    app.get('/desfazer', async (req, res) => {
+        //recuperar o parâmetro id da barra de endereço
+        var id = req.query.id
+        var desfazer = await atividades.findOneAndUpdate(
+            { _id: id },
+            { status: 0 }
+        )
+        //redirecionar para a rota atividades
+        res.redirect('/atividades?id=' + desfazer.usuario)
+    })
 
-        app.get('/alterar',async(req,res)=>{
-            //capturar o id da barra de endereço
-            var id = req.query.id
-                //buscar a atividade que sera alterada
-                var alterar= await atividades.findOne({_id:id})
-            //buscar o nome na collection usuarios
-            var user = await usuarios.findOne({_id:alterar.usuario})  
-        
-            //buscar todas as atividades desse usuário
-            var entregues = await atividades.find({usuario:id,status:1}).sort({data:1})
-            //buscar todas as atividades desse usuário
-            var excluidas = await atividades.find({usuario:id,status:2}).sort({data:1})
-            //console.log(buscar)
-            //res.render('atividades.ejs',{nome:user.nome,id:user._id,dados:abertas,dadosx:excluidas,dadose:entregues})
-            //res.render('accordion.ejs',{nome:user.nome,id:user._id,dados:abertas,dadosx:excluidas,dadose:entregues})
-            res.render('alterar.ejs',{nome:user.nome,id:user._id,dados:alterar})
-    
-        })
+    //criar a rota para renderizar a view alterar
+    app.get('/alterar', async (req, res) => {
+        //capturar o id(atividades) da barra de endereço
+        var id = req.query.id
+        //buscar a atividades que será alterada
+        var alterar = await atividades.findOne({_id:id})
+        //buscar o nome da collection usuarios
+        var user = await usuarios.findOne({ _id: alterar.usuario })
+
+        res.render('alterar.ejs', { nome: user.nome, id: user._id, dados: alterar })
+    })
+
+
+//criar a rota para gravar as alterações na atividade
+app.post('/alterar',async(req,res)=>{
+    //qual atividade será atualizada
+    //var id_a = req.query.id
+    //quais são as informações digitadas?
+    var infos = req.body
+    console.log(infos)
+    //gravar as alterações na colletion atividades
+    var gravar = await atividades.findOneAndUpdate(
+        {_id:infos.id_a},
+        {   data:infos.data,
+            tipo:infos.tipo,
+            disciplina:infos.disciplina,
+            entrega:infos.entrega,
+            instrucoes:infos.orientacao
+        }
+        )
+        res.redirect('/atividades?id='+infos.id)
+    })
 }
-
-
-
